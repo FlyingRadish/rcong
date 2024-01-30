@@ -6,23 +6,42 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"time"
 )
 
 type RCONConnection struct {
-	conn     net.Conn
-	password string
+	conn       net.Conn
+	ip         string
+	port       int
+	password   string
+	retryCount int
+	retryDelay int
 }
 
-func Dial(ip string, port int, password string) (*RCONConnection, error) {
-	address := fmt.Sprintf("%s:%d", ip, port)
+func NewRCONConnection(ip string, port int, password string, retryCount int, retryDelay int) *RCONConnection {
+	connection := &RCONConnection{
+		ip:         ip,
+		port:       port,
+		password:   password,
+		retryCount: retryCount,
+		retryDelay: retryDelay,
+	}
+	return connection
+}
+
+func (c *RCONConnection) Connect() error {
+	c.Close()
+	address := fmt.Sprintf("%s:%d", c.ip, c.port)
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	connection := &RCONConnection{conn: conn, password: password}
-	//auth
-	connection.Auth()
-	return connection, nil
+	c.conn = conn
+	// auth
+	if len(c.password) > 0 {
+		c.Auth()
+	}
+	return nil
 }
 
 func (c *RCONConnection) Auth() (string, error) {
@@ -50,6 +69,37 @@ func (c *RCONConnection) Auth() (string, error) {
 }
 
 func (c *RCONConnection) ExecCommand(command string) (string, error) {
+	return c.ExecCommandImp(command, c.retryCount)
+}
+
+func (c *RCONConnection) ExecCommandImp(command string, retryCount int) (string, error) {
+	if c.conn == nil {
+		if c.retryCount > 0 {
+			if c.retryDelay > 0 {
+				time.Sleep(time.Duration(c.retryDelay) * time.Second)
+			}
+			c.Connect()
+			return c.ExecCommandImp(command, retryCount-1)
+		} else {
+			return "", fmt.Errorf("RCON connection is not established")
+		}
+	}
+	resp, err := c.execute(command)
+	if err != nil {
+		if retryCount > 0 {
+			if c.retryDelay > 0 {
+				time.Sleep(time.Duration(c.retryDelay) * time.Second)
+			}
+			c.Connect()
+			return c.ExecCommandImp(command, retryCount-1)
+		} else {
+			return "", err
+		}
+	}
+	return resp, nil
+}
+
+func (c *RCONConnection) execute(command string) (string, error) {
 	packet := createPacket(DUMB_ID, SERVERDATA_EXECCOMMAND, command)
 	_, wRrr := c.conn.Write(packet)
 	if wRrr != nil {
@@ -71,6 +121,9 @@ func (c *RCONConnection) ExecCommand(command string) (string, error) {
 }
 
 func (c *RCONConnection) Close() {
+	if c.conn != nil {
+
+	}
 	c.conn.Close()
 }
 
