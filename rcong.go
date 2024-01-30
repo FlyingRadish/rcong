@@ -122,9 +122,8 @@ func (c *RCONConnection) execute(command string) (string, error) {
 
 func (c *RCONConnection) Close() {
 	if c.conn != nil {
-
+		c.conn.Close()
 	}
-	c.conn.Close()
 }
 
 const (
