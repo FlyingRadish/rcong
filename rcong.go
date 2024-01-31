@@ -39,13 +39,13 @@ func (c *RCONConnection) Connect() error {
 	c.conn = conn
 	// auth
 	if len(c.password) > 0 {
-		c.Auth()
+		c.auth()
 	}
 	return nil
 }
 
-func (c *RCONConnection) Auth() (string, error) {
-	packet := createPacket(DUMB_ID, SERVERDATA_AUTH, c.password)
+func (c *RCONConnection) auth() (string, error) {
+	packet := createPacket(dumb_ID, serverDATA_AUTH, c.password)
 	_, wRrr := c.conn.Write(packet)
 	if wRrr != nil {
 		return "", wRrr
@@ -61,7 +61,7 @@ func (c *RCONConnection) Auth() (string, error) {
 		return "", errors.New("auth failed, wrong password")
 	}
 
-	if pkg.ID != DUMB_ID {
+	if pkg.ID != dumb_ID {
 		return "", err
 	}
 
@@ -69,10 +69,10 @@ func (c *RCONConnection) Auth() (string, error) {
 }
 
 func (c *RCONConnection) ExecCommand(command string) (string, error) {
-	return c.ExecCommandImp(command, c.retryCount)
+	return c.execCommandImp(command, c.retryCount)
 }
 
-func (c *RCONConnection) ExecCommandImp(command string, retryCount int) (string, error) {
+func (c *RCONConnection) execCommandImp(command string, retryCount int) (string, error) {
 	if c.conn == nil {
 		if c.retryCount > 0 {
 			if c.retryDelay > 0 {
@@ -100,13 +100,13 @@ func (c *RCONConnection) ExecCommandImp(command string, retryCount int) (string,
 }
 
 func (c *RCONConnection) execute(command string) (string, error) {
-	packet := createPacket(DUMB_ID, SERVERDATA_EXECCOMMAND, command)
+	packet := createPacket(dumb_ID, serverDATA_EXECCOMMAND, command)
 	_, wRrr := c.conn.Write(packet)
 	if wRrr != nil {
 		return "", wRrr
 	}
 
-	buf := make([]byte, MAX_PACKET_SIZE)
+	buf := make([]byte, max_PACKET_SIZE)
 
 	_, rErr := c.conn.Read(buf)
 	if rErr != nil {
@@ -127,23 +127,23 @@ func (c *RCONConnection) Close() {
 }
 
 const (
-	SERVERDATA_AUTH           int32 = 3
-	SERVERDATA_AUTH_RESPONSE  int32 = 2
-	SERVERDATA_EXECCOMMAND    int32 = 2
-	SERVERDATA_RESPONSE_VALUE int32 = 0
-	MAX_PACKET_SIZE           int32 = 4096
+	serverDATA_AUTH           int32 = 3
+	serverDATA_AUTH_RESPONSE  int32 = 2
+	serverDATA_EXECCOMMAND    int32 = 2
+	serverDATA_RESPONSE_VALUE int32 = 0
+	max_PACKET_SIZE           int32 = 4096
 
-	DUMB_ID int32 = 0
+	dumb_ID int32 = 0
 )
 
-type RCONPacket struct {
+type rconPacket struct {
 	Size int32
 	ID   int32
 	Type int32
 	Body string
 }
 
-const HeaderLength = 10
+const headerLength = 10
 const maximumPackageSize = 4096
 
 func createPacket(id int32, pkgType int32, command string) []byte {
@@ -160,8 +160,8 @@ func createPacket(id int32, pkgType int32, command string) []byte {
 	return buf.Bytes()
 }
 
-func readPacket(buf []byte) (RCONPacket, error) {
-	packet := &RCONPacket{}
+func readPacket(buf []byte) (rconPacket, error) {
+	packet := &rconPacket{}
 	packet.Size = int32(binary.LittleEndian.Uint32(buf[0:4]))
 	packet.ID = int32(binary.LittleEndian.Uint32(buf[4:8]))
 	packet.Type = int32(binary.LittleEndian.Uint32(buf[8:12]))
