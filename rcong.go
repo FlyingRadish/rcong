@@ -79,7 +79,7 @@ func (c *RCONConnection) execCommandImp(command string, retryCount int) (string,
 				time.Sleep(time.Duration(c.retryDelay) * time.Second)
 			}
 			c.Connect()
-			return c.ExecCommandImp(command, retryCount-1)
+			return c.execCommandImp(command, retryCount-1)
 		} else {
 			return "", fmt.Errorf("RCON connection is not established")
 		}
@@ -91,7 +91,7 @@ func (c *RCONConnection) execCommandImp(command string, retryCount int) (string,
 				time.Sleep(time.Duration(c.retryDelay) * time.Second)
 			}
 			c.Connect()
-			return c.ExecCommandImp(command, retryCount-1)
+			return c.execCommandImp(command, retryCount-1)
 		} else {
 			return "", err
 		}
