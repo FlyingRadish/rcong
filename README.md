@@ -16,10 +16,10 @@ go get github.com/FlyingRadish/rcong
 package main
 
 import (
-    "fmt"
+	"fmt"
 	"log"
 
-    "github.com/FlyingRadish/rcong"
+	"github.com/FlyingRadish/rcong"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	fmt.Println(response)	
 }
 

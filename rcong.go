@@ -51,7 +51,7 @@ func (c *RCONConnection) auth() (string, error) {
 		return "", wRrr
 	}
 
-	buf := make([]byte, MAX_PACKET_SIZE)
+	buf := make([]byte, max_PACKET_SIZE)
 	_, rErr := c.conn.Read(buf)
 	if rErr != nil {
 		return "", rErr
