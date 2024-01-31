@@ -1,4 +1,4 @@
-# GRCON
+# RCONG
 
 RCON Protocol implementation for Go
 
