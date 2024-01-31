@@ -6,6 +6,9 @@ RCON Protocol implementation for Go
 
 I recently started playing `PalWorld`, and I've searched through all the RCON Go libraries, but none of them offer good support for the `ShowPlayers` command. That's why I created this library.
 
+## CLI tool
+If you just want to send RCON commands easily, [rcong-cli](https://github.com/FlyingRadish/rcong-cli) is available.
+
 ## Install
 ```
 go get github.com/FlyingRadish/rcong
