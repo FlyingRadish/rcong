@@ -17,16 +17,14 @@ package main
 
 import (
     "fmt"
+	"log"
 
     "github.com/FlyingRadish/rcong"
 )
 
 func main() {
-	conn, err := rcong.NewRCONConnection("127.0.0.1", 25575, "password", 3, 10)
-	if err != nil {
-		log.Fatal(err)
-	}
-    conn.Connect()
+	conn := rcong.NewRCONConnection("127.0.0.1", 25575, "password", 3, 10)
+	conn.Connect()
 	defer conn.Close()
 
 	response, err := conn.ExecCommand("ShowPlayers")
